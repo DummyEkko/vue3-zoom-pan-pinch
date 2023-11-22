@@ -1,0 +1,27 @@
+html,
+body {
+  font-family: system-ui, Arial, sans-serif, Menlo, 'Bitstream Vera Sans Mono',
+    'Ubuntu Mono', Consolas, 'Courier New', Courier, monospace;
+  margin: 0;
+  padding: 0;
+}
+
+#app {
+  height: 100vh;
+  width: 100vw;
+}
+
+
+.clip-box {
+  position: absolute;
+  bottom: 0;
+  border: 2px solid #dcdcdc;
+  width: 30%;
+  height: 20%;
+  &:focus{
+    border: 2px solid blue;
+  }
+  &:active{
+    border: 2px solid blue;
+  }
+}
