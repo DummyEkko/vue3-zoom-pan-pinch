@@ -12,16 +12,9 @@ body {
 }
 
 
-.clip-box {
-  position: absolute;
-  bottom: 0;
-  border: 2px solid #dcdcdc;
-  width: 30%;
-  height: 20%;
-  &:focus{
-    border: 2px solid blue;
-  }
-  &:active{
-    border: 2px solid blue;
+.content {
+  img {
+    width: 50vw;
+    height: auto;
   }
 }
