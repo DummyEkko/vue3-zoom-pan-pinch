@@ -8,8 +8,9 @@ export default defineComponent({
   setup() {
     const transformComponentRef = ref(null)
 
+
     return () => (
-      <TransformComponent ref={transformComponentRef}>
+      <TransformComponent ref={transformComponentRef} panningEnabled={true} initScale={1} zoomingEnabled={true}>
       <div class="content">
         <img src={car} />
       </div>

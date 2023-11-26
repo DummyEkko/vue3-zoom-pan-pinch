@@ -11,13 +11,17 @@ export default defineComponent({
     },
     panningEnabled: {
       default: true,
+    },
+    zoomingEnabled: {
+      default: true,
     }
   },
   setup(context, { slots }) {
     // zoom
     const wrapper = ref<HTMLElement | null>(null)
     const contentRef = ref<HTMLElement | null>(null)
-    const { state, zoomIn, zoomOut, resetTransform } = useZoom({ wrapper, contentRef, panningEnabled: context.panningEnabled })
+    const { initScale, ...rest } = context
+    const { state, zoomIn, zoomOut, resetTransform } = useZoom({ wrapper, contentRef,  scale: initScale, ...rest})
 
     const style = computed(() => ({
       transform: `translate(${state.positionX}px, ${state.positionY}px) scale(${state.scale})`,

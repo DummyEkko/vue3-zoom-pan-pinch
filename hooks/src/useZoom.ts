@@ -39,6 +39,7 @@ type Optiosn = {
   contentRef: Ref<HTMLElement | null>
   zoomingEnabled?: boolean,
   panningEnabled?: boolean,
+  scale?: number
 }
 
 /**
