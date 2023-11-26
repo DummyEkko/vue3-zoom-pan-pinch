@@ -1,8 +1,8 @@
 # vue3-zoom-pan-pinch
 
-vue3 的缩放、平移等手势功能。
+> Super fast and light vue3 npm package for zooming, panning and pinching html elements in easy way
 
-pan is under development 🤔️
+pinch is under development 🤔️
 
 
 ### en

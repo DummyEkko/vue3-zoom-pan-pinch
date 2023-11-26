@@ -1,4 +1,4 @@
-import { reactive, ref, watch, shallowRef, Ref } from 'vue'
+import { reactive, ref, watch, shallowRef, Ref, onMounted, onUnmounted } from 'vue'
 
 function checkIsNumber(num: unknown, defaultValue: number) {
   return typeof num === 'number' ? num : defaultValue
@@ -37,6 +37,8 @@ const initialState = {
 type Optiosn = {
   wrapper: Ref<HTMLElement | null>
   contentRef: Ref<HTMLElement | null>
+  zoomingEnabled?: boolean,
+  panningEnabled?: boolean,
 }
 
 /**
@@ -78,9 +80,9 @@ export const calculateBoundingArea = (
   return { minPositionX, maxPositionX, minPositionY, maxPositionY };
 };
 
-export function useZoom({ wrapper, contentRef }: Optiosn) {
-  const state = reactive({ ...initialState })
+export function useZoom({ wrapper, contentRef, ...rest }: Optiosn) {
 
+  const state = reactive({ ...initialState, ...rest })
 
   function relativeCoords(
     event: WheelEvent | MouseEvent,
@@ -171,10 +173,6 @@ export function useZoom({ wrapper, contentRef }: Optiosn) {
       setCenterClick ? wrapperHeight / 2 : y
     );
 
-    // Determine new zoomed in point
-    const targetX = (mouseX - positionX) / scale
-    const targetY = (mouseY - positionY) / scale
-
     const zoomSensitivity = (customSensitivity || sensitivity) * 0.1;
 
     // Calculate new zoom
@@ -208,8 +206,9 @@ export function useZoom({ wrapper, contentRef }: Optiosn) {
     );
 
     // Calculate new positions
-    const newPositionX = -targetX * newScale + mouseX;
-    const newPositionY = -targetY * newScale + mouseY;
+    const scaleDifference = newScale - scale;
+    const newPositionX = -(mouseX * scaleDifference) + positionX;
+    const newPositionY = -(mouseY * scaleDifference) + positionY;
 
     state.positionX = boundLimiter(newPositionX, minPositionX, maxPositionX, limitToBounds)
     state.positionY = boundLimiter(newPositionY, minPositionY, maxPositionY, limitToBounds)
@@ -306,10 +305,29 @@ export function useZoom({ wrapper, contentRef }: Optiosn) {
     state.isDown = false
   };
 
+  onMounted(() => {
+    // zoom
+    wrapper.value?.addEventListener('wheel', handleZoom, false)
+    contentRef.value?.addEventListener('dblclick', handleDbClick, false)
+
+    // pan
+    if (!state.panningEnabled) return
+    window.addEventListener('mousedown', handleStartPanning, false)
+    window.addEventListener('mousemove', handlePanning, false)
+    window.addEventListener("mouseup", handleStopPanning, false);
+  })
+
+  onUnmounted(() => {
+    wrapper.value?.removeEventListener('wheel', handleZoom)
+    contentRef.value?.removeEventListener('dblclick', handleDbClick)
+
+    window.removeEventListener('mousedown', handleStartPanning)
+    window.removeEventListener('mousemove', handlePanning)
+    window.removeEventListener("mouseup", handleStopPanning);
+  })
+
   return {
     state,
-    onWheel: handleZoom,
-    onDblclick: handleDbClick,
     zoomIn,
     zoomOut,
     resetTransform,

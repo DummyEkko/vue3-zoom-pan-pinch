@@ -19,13 +19,6 @@ export default defineComponent({
           <div class="content">
             <img src={car} />
           </div>
-          {/* {{
-            default: () => (
-              <div class="content">
-                <img src={car} />
-              </div>
-            ),
-          }} */}
         </TransformComponent>
       </>
     )
