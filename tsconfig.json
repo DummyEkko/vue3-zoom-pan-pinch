@@ -1,16 +1,12 @@
 {
+  "root": true,
   "compilerOptions": {
-    "target": "esnext",
-    "useDefineForClassFields": true,
-    "module": "esnext",
+    "target": "es2022",
     "moduleResolution": "node",
-    "strict": true,
-    "jsx": "preserve",
-    "sourceMap": true,
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "lib": ["esnext", "dom"]
+    // vite 会读取到这个 tsconfig 文件(位于工作空间根目录)，按照其推荐配置这两个选项
+    // https://cn.vitejs.dev/guide/features.html#typescript-compiler-options
+    "isolatedModules": true,
+    "useDefineForClassFields": true
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
-  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
+  "references": [{ "path": "./tsconfig.node.json" }, { "path": "./tsconfig.components.json" }]
 }

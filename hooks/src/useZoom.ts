@@ -39,6 +39,7 @@ type Optiosn = {
   contentRef: Ref<HTMLElement | null>
   zoomingEnabled?: boolean,
   panningEnabled?: boolean,
+  scale?: number
 }
 
 /**
@@ -53,6 +54,36 @@ export const boundLimiter = (value, minBound, maxBound, isActive) => {
   if (value < minBound) return minBound;
   if (value > maxBound) return maxBound;
   return value;
+};
+
+/**
+ * Returns middle position of PageX for touch events
+ */
+export const getMidPagePosition = (firstPoint, secondPoint) => {
+  return {
+    x: (firstPoint.clientX + secondPoint.clientX) / 2,
+    y: (firstPoint.clientY + secondPoint.clientY) / 2,
+  };
+};
+
+
+/**
+ * Returns middle coordinates x,y of two points
+ * Used to get middle point of two fingers pinch
+ */
+export const getMiddleCoords = (firstPoint, secondPoint, wrapperComponent) => {
+  if (isNaN(firstPoint.x)) {
+    const dist = getMidPagePosition(firstPoint, secondPoint);
+    const rect = wrapperComponent.getBoundingClientRect();
+    return {
+      x: dist.x - rect.x,
+      y: dist.y - rect.y,
+    };
+  }
+  return {
+    x: (firstPoint.x + secondPoint.x) / 2,
+    y: (firstPoint.y + secondPoint.y) / 2,
+  };
 };
 
 /**
@@ -123,7 +154,7 @@ export function useZoom({ wrapper, contentRef, ...rest }: Optiosn) {
 
   function handleZoom(
     event: WheelEvent | MouseEvent,
-    setCenterClick?: { x: number, y: number },
+    setCenterClick?: { x: number, y: number } | boolean,
     customDelta?: unknown,
     customSensitivity?: unknown
   ) {
@@ -151,11 +182,7 @@ export function useZoom({ wrapper, contentRef, ...rest }: Optiosn) {
     const {
       x,
       y,
-      diffHeight,
-      diffWidth,
-      contentWidth,
       wrapperWidth,
-      contentHeight,
       wrapperHeight,
     } = relativeCoords(event, wrapper.value, contentRef.value, false)
 
@@ -163,6 +190,10 @@ export function useZoom({ wrapper, contentRef, ...rest }: Optiosn) {
     const deltaY = event ? (event.deltaY < 0 ? 1 : -1) : 0
     const delta = checkIsNumber(customDelta, deltaY)
 
+    const zoomSensitivity = (customSensitivity || sensitivity) * 0.1;
+
+    // Calculate new zoom
+    let newScale = roundNumber(scale + delta * zoomSensitivity * scale, 2);
     // Mouse position
     const mouseX = checkIsNumber(
       setCenterClick && setCenterClick.x,
@@ -173,11 +204,6 @@ export function useZoom({ wrapper, contentRef, ...rest }: Optiosn) {
       setCenterClick ? wrapperHeight / 2 : y
     );
 
-    const zoomSensitivity = (customSensitivity || sensitivity) * 0.1;
-
-    // Calculate new zoom
-    let newScale = roundNumber(scale + delta * zoomSensitivity * scale, 2);
-
     if (newScale >= maxScale && scale < maxScale) {
       newScale = maxScale
     }
@@ -185,8 +211,6 @@ export function useZoom({ wrapper, contentRef, ...rest }: Optiosn) {
       newScale = minScale
     }
     if (newScale > maxScale || newScale < minScale) return
-
-    state.scale = newScale
 
     const newContentWidth = wrapperWidth * newScale;
     const newContentHeight = wrapperHeight * newScale;
@@ -205,6 +229,7 @@ export function useZoom({ wrapper, contentRef, ...rest }: Optiosn) {
       enableZoomedOutPanning
     );
 
+    state.scale = newScale
     // Calculate new positions
     const scaleDifference = newScale - scale;
     const newPositionX = -(mouseX * scaleDifference) + positionX;
@@ -217,13 +242,13 @@ export function useZoom({ wrapper, contentRef, ...rest }: Optiosn) {
   function zoomIn(event: WheelEvent) {
     const { zoomingEnabled, disabled, zoomInSensitivity } = state;
     if (!zoomingEnabled || disabled) return;
-    handleZoom(event, undefined, 1, zoomInSensitivity);
+    handleZoom(event, true, 1, zoomInSensitivity);
   };
 
   function zoomOut(event: WheelEvent){
     const { zoomingEnabled, disabled, zoomOutSensitivity } = state;
     if (!zoomingEnabled || disabled) return;
-    handleZoom(event, undefined, -1, zoomOutSensitivity);
+    handleZoom(event, true, -1, zoomOutSensitivity);
   };
 
   function resetTransform(defaultScale: unknown, defaultPositionX: unknown, defaultPositionY: unknown) {
@@ -239,7 +264,7 @@ export function useZoom({ wrapper, contentRef, ...rest }: Optiosn) {
   };
 
 
-  function handleStartPanning(event: MouseEvent) {
+  function handleStartPanning(event: MouseEvent | TouchEvent) {
     const {
       isDown,
       panningEnabled,
@@ -249,11 +274,23 @@ export function useZoom({ wrapper, contentRef, ...rest }: Optiosn) {
     } = state;
     if (!wrapper.value || !contentRef.value) return
     const { target } = event;
-    if (isDown || !panningEnabled || disabled || !wrapper.value.contains(target)) return;
-    const { x, y } = relativeCoords(event, wrapper.value, contentRef.value, true);
+    if (isDown || !panningEnabled || disabled) return;
+    if (!wrapper.value.contains(target)) return
+    const isPinch = event instanceof TouchEvent
+    if (isPinch && event.touches && event.touches.length !== 1) return
+    const ponit = {x: 0, y: 0}
+    if (isPinch) {
+      const { x, y }  = getMiddleCoords(event.touches[0], event.touches[0], wrapperComponent);
+      ponit.x = x
+      ponit.y = y
+    } else {
+      const { x, y } = relativeCoords(event, wrapper.value, contentRef.value, true);
+      ponit.x = x
+      ponit.y = y
+    }
     state.startCoords = {
-      x: x - positionX,
-      y: y - positionY,
+      x: ponit.x - positionX,
+      y: ponit.y - positionY,
     }
     state.isDown = true
   };
@@ -304,6 +341,15 @@ export function useZoom({ wrapper, contentRef, ...rest }: Optiosn) {
     if (!panningEnabled || disabled) return;
     state.isDown = false
   };
+
+
+
+  const handlePinchStart = (event: TouchEvent) => {
+    handleStartPanning(event);
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
 
   onMounted(() => {
     // zoom

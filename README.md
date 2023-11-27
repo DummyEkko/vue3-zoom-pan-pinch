@@ -11,10 +11,20 @@ pinch is under development 🤔️
 - [ ] pan
 - [ ] pinch
 
-## Setup
-
-`npm install`
 
 ## Development
 
-`npm run dev`
+```bash
+pnpm install
+
+pnpm --filter example run dev
+
+```
+
+## Props of TransformComponent
+
+| Props                  |           Type |
+| :--------------------- | -------------: |
+| initScale            |         Number |
+| panningEnabled      |         Boolean |
+| zoomingEnabled      |         Boolean |

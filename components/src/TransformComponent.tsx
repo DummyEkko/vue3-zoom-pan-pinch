@@ -1,14 +1,7 @@
 import { defineComponent, ref, computed } from 'vue'
 import styles from './TransformComponent.module.scss'
-import { useZoom } from '../hooks'
+import { useZoom } from '@vue3-zoom-pan-pinch/hooks'
 
-function roundNumber(num: number, decimal = 5) {
-  return Number(num.toFixed(decimal))
-}
-
-function checkIsNumber(num: unknown, defaultValue: number) {
-  return typeof num === 'number' ? num : defaultValue
-}
 
 export default defineComponent({
   name: 'TransformComponent',
@@ -18,13 +11,17 @@ export default defineComponent({
     },
     panningEnabled: {
       default: true,
+    },
+    zoomingEnabled: {
+      default: true,
     }
   },
   setup(context, { slots }) {
     // zoom
     const wrapper = ref<HTMLElement | null>(null)
     const contentRef = ref<HTMLElement | null>(null)
-    const { state, zoomIn, zoomOut, resetTransform } = useZoom({ wrapper, contentRef, panningEnabled: context.panningEnabled })
+    const { initScale, ...rest } = context
+    const { state, zoomIn, zoomOut, resetTransform } = useZoom({ wrapper, contentRef,  scale: initScale, ...rest})
 
     const style = computed(() => ({
       transform: `translate(${state.positionX}px, ${state.positionY}px) scale(${state.scale})`,
