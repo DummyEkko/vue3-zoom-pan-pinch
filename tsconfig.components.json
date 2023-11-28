@@ -3,6 +3,7 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
+    "baseUrl": "./",
     // 组件库依赖浏览器的 DOM API
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "types": ["vite/client", "node"],
@@ -12,6 +13,6 @@
       "vue3-zoom-pan-pinch": ["./components/src"]
     },
   },
-  "include": ["components/**/*.ts", "components/**/*.d.ts", "components/**/*.tsx", "components/**/*.vue", "**/src/*"],
-  "exclude": ["components/**/*.test.ts", "components/**/*.test.tsx"]
+  "include": ["components/**/*.ts", "components/**/*.d.ts", "components/**/*.tsx", "components/**/*.vue", "./hooks/src"],
+  "exclude": ["components/**/*.test.ts", "components/**/*.test.tsx", "components/**/*.config.ts"]
 }

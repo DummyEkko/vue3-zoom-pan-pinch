@@ -23,8 +23,23 @@ pnpm --filter example run dev
 
 ## Props of TransformComponent
 
+
 | Props                  |           Type |
 | :--------------------- | -------------: |
-| initScale            |         Number |
-| panningEnabled      |         Boolean |
-| zoomingEnabled      |         Boolean |
+| initScale              |         Number |
+| maxScale               | Number or null |
+| minScale               | Number or null |
+| disabled               |        Boolean |
+| limitToBounds          |        Boolean |
+
+| panningEnabled         |         Boolean|
+| enableZoomedOutPanning |        Boolean |
+
+| zoomingEnabled         |         Boolean|
+| zoomInSensitivity      |         Number |
+| zoomOutSensitivity     |         Number |
+| dbClickSensitivity     |         Number |
+
+| pinchEnabled           |         Boolean|
+| pinchSensitivity       |         Number |
+

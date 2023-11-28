@@ -6,6 +6,9 @@ import { join, resolve } from 'node:path';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue(), jsx()],
+  server: {
+    host: true,
+  },
   resolve: {
     alias: [
       {

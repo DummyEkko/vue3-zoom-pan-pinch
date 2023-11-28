@@ -1,4 +1,4 @@
-import { defineComponent, ref, computed } from 'vue'
+import { defineComponent, ref, computed, getCurrentInstance } from 'vue'
 import styles from './TransformComponent.module.scss'
 import { useZoom } from '@vue3-zoom-pan-pinch/hooks'
 
@@ -16,17 +16,17 @@ export default defineComponent({
       default: true,
     }
   },
-  setup(context, { slots }) {
-    // zoom
+  setup(props, { slots, expose }) {
     const wrapper = ref<HTMLElement | null>(null)
     const contentRef = ref<HTMLElement | null>(null)
-    const { initScale, ...rest } = context
+    const { initScale, ...rest } = props
     const { state, zoomIn, zoomOut, resetTransform } = useZoom({ wrapper, contentRef,  scale: initScale, ...rest})
 
     const style = computed(() => ({
       transform: `translate(${state.positionX}px, ${state.positionY}px) scale(${state.scale})`,
     }))
 
+    expose({ zoomOut, resetTransform, zoomIn })
 
     return () => (
       <div ref={wrapper} class={styles.container}>

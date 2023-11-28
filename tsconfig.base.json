@@ -1,10 +1,9 @@
-// tsconfig.base.json
 {
   "compilerOptions": {
     // 项目的根目录
     "rootDir": ".",
     // 项目基础目录
-    "baseUrl": "./",
+    "baseUrl": ".",
     // tsc 编译产物输出目录
     "outDir": "dist",
     // 编译目标 js 的版本
@@ -36,7 +35,8 @@
     "lib": [],
     // 默认引入的模块类型声明
     "types": [],
-
+    "allowJs": true,
     "jsx": "preserve",
+    "jsxImportSource": "vue",
   }
 }

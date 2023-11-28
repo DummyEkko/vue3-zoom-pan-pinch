@@ -1,5 +1,4 @@
 {
-  "root": true,
   "compilerOptions": {
     "target": "es2022",
     "moduleResolution": "node",
