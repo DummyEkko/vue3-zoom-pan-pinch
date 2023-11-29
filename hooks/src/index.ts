@@ -1,7 +1,8 @@
-import { useImage } from './useImage'
+
 import { useZoom } from './useZoom'
+import { useGesture  } from './useGesture'
 
 export {
-  useImage,
   useZoom,
+  useGesture,
 }

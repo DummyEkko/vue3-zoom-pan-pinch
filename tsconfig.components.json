@@ -13,6 +13,6 @@
       "vue3-zoom-pan-pinch": ["./components/src"]
     },
   },
-  "include": ["components/**/*.ts", "components/**/*.d.ts", "components/**/*.tsx", "components/**/*.vue", "./hooks/src"],
+  "include": ["components/**/*.ts", "components/**/*.d.ts", "components/**/*.tsx", "components/**/*.vue", "./hooks/src", "./env.d.ts"],
   "exclude": ["components/**/*.test.ts", "components/**/*.test.tsx", "components/**/*.config.ts"]
 }

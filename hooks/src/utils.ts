@@ -47,12 +47,12 @@ export const calculateBoundingArea = (
   wrapperHeight: number,
   contentHeight: number,
   diffHeight: number,
-  enableZoomedOutPanning: boolean
+  limitToWrapperBounds: boolean
 ) => {
   const scaleWidthFactor =
-    wrapperWidth > contentWidth ? diffWidth * (enableZoomedOutPanning ? 1 : 0.5) : 0;
+    wrapperWidth > contentWidth ? diffWidth * (limitToWrapperBounds ? 1 : 0.5) : 0;
   const scaleHeightFactor =
-    wrapperHeight > contentHeight ? diffHeight * (enableZoomedOutPanning ? 1 : 0.5) : 0;
+    wrapperHeight > contentHeight ? diffHeight * (limitToWrapperBounds ? 1 : 0.5) : 0;
 
   const minPositionX = wrapperWidth - contentWidth - scaleWidthFactor;
   const maxPositionX = 0 + scaleWidthFactor;
@@ -84,3 +84,102 @@ export const boundLimiter = (value, minBound, maxBound, isActive) => {
 export const getDistance = (firstPoint: Touch, secondPoint: Touch) => {
   return Math.hypot(firstPoint.pageX - secondPoint.pageX, firstPoint.pageY - secondPoint.pageY);
 };
+
+
+
+let passiveSupported = false;
+
+export function makePassiveEventOption(passive) {
+  return passiveSupported ? { passive } : passive;
+}
+
+
+export function getDelta(event: WheelEvent | MouseEvent | TouchEvent, customDelta?: unknown) {
+  const deltaY = event ? (event.deltaY < 0 ? 1 : -1) : 0;
+  const delta = checkIsNumber(customDelta, deltaY);
+  return delta;
+}
+
+export function checkZoomBounds(zoom: number, minScale: number, maxScale: number, zoomPadding: number, enablePadding: boolean) {
+  const scalePadding = enablePadding ? zoomPadding : 0;
+  const minScaleWithPadding = minScale - scalePadding;
+
+  if (!isNaN(maxScale) && zoom >= maxScale) return maxScale;
+  if (!isNaN(minScale) && zoom <= minScaleWithPadding) return minScaleWithPadding;
+  return zoom;
+}
+
+
+export function getComponentsSizes(wrapperComponent: HTMLElement, newScale: number) {
+  const wrapperRect = wrapperComponent.getBoundingClientRect();
+
+  const wrapperWidth = wrapperRect.width;
+  const wrapperHeight = wrapperRect.height;
+
+  const newWrapperWidth = wrapperWidth * newScale;
+  const newWrapperHeight = wrapperHeight * newScale;
+
+  const newDiffWidth = wrapperWidth - newWrapperWidth;
+  const newDiffHeight = wrapperHeight - newWrapperHeight;
+
+  return {
+    wrapperWidth,
+    wrapperHeight,
+    newWrapperWidth,
+    newDiffWidth,
+    newWrapperHeight,
+    newDiffHeight,
+  };
+}
+
+
+export function wheelMousePosition(event: MouseEvent | WheelEvent, contentComponent: HTMLElement, scale: number): {
+  mouseX: number,
+  mouseY: number
+} {
+  const contentRect = contentComponent.getBoundingClientRect();
+
+  // mouse position x, y over wrapper component
+  const mouseX = (event.clientX - contentRect.left) / scale;
+  const mouseY = (event.clientY - contentRect.top) / scale;
+
+  if (isNaN(mouseX) || isNaN(mouseY)) return console.error("No mouse or touch offset found");
+
+  return {
+    mouseX,
+    mouseY,
+  };
+}
+
+
+export function handleCalculatePositions(state, mouseX, mouseY, newScale, bounds, limitToBounds) {
+
+  const { scale, positionX, positionY, transformEnabled } = state;
+  console.log(scale, positionX, positionY, transformEnabled , state);
+
+  const scaleDifference = newScale - scale;
+
+  if (typeof mouseX !== "number" || typeof mouseY !== "number")
+    return console.error("Mouse X and Y position were not provided!");
+
+  if (!transformEnabled) return { newPositionX: positionX, newPositionY: positionY };
+
+  const calculatedPositionX = positionX - mouseX * scaleDifference;
+  const calculatedPositionY = positionY - mouseY * scaleDifference;
+
+  const newPositions = checkPositionBounds(
+    calculatedPositionX,
+    calculatedPositionY,
+    bounds,
+    limitToBounds
+  );
+
+  return newPositions;
+}
+
+export function checkPositionBounds(positionX: number, positionY: number, bounds, limitToBounds) {
+  const { minPositionX, minPositionY, maxPositionX, maxPositionY } = bounds;
+  const x = boundLimiter(positionX, minPositionX, maxPositionX, limitToBounds);
+  const y = boundLimiter(positionY, minPositionY, maxPositionY, limitToBounds);
+  return { x, y };
+}

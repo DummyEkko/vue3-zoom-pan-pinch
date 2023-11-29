@@ -1,0 +1,23 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    // Web 应用需要 DOM 环境
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    // 路径别名设置
+    "paths": {
+      "@vue3-zoom-pan-pinch/hooks": ["../hooks/src"],
+      "vue3-zoom-pan-pinch": ["../components/src"]
+    },
+    "jsx": "preserve"
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "./env.d.ts"
+, "../hooks/src/types.ts"  ],
+  "references": [{ "path": "../tsconfig.node.json" }],
+  "exclude": ["node_modules", "dist", "**/*.js"]
+}
