@@ -1,3 +1,10 @@
 {
-  "typescript.tsdk": "node_modules\\typescript\\lib"
+  "typescript.tsdk": "node_modules\\typescript\\lib",
+    // 启用自动代码修复功能，保存时触发 eslint 和 stylelint 的自动修复。
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true,
+      "source.fixAll.stylelint": true
+    },
+      // 启用 eslint 的格式化能力
+  "eslint.format.enable": true,
 }

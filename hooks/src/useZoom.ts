@@ -10,6 +10,7 @@ import {
   getComponentsSizes,
   wheelMousePosition,
   handleCalculatePositions,
+  handleCalculateBounds
 } from "./utils";
 import type { InitialState } from "./types";
 import { log } from "console";
@@ -22,35 +23,7 @@ interface Optiosn<T> {
 
 let wheelStopEventTimer: NodeJS.Timeout | null
 
-export function handleCalculateBounds(
-  newScale: number,
-  limitToWrapper: boolean,
-  wrapper: HTMLElement
-) {
-  const {
-    wrapperWidth,
-    wrapperHeight,
-    newWrapperHeight,
-    newDiffWidth,
-    newWrapperWidth,
-    newDiffHeight,
-  } = getComponentsSizes(wrapper, newScale);
 
-  const bounds = calculateBoundingArea(
-    wrapperWidth,
-    newWrapperWidth,
-    newDiffWidth,
-    wrapperHeight,
-    newWrapperHeight,
-    newDiffHeight,
-    limitToWrapper
-  );
-
-  console.log(bounds, 'bounds');
-
-
-  return bounds;
-}
 
 function handleCalculateZoom(state: InitialState, delta: number, step: number, disablePadding: boolean) {
   const {

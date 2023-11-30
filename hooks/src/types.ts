@@ -80,5 +80,9 @@ export interface InitialState {
     animationTime: number;
     animationType: string;
   };
+  pinch: {
+    disabled: boolean;
+    step: number;
+  };
 }
 

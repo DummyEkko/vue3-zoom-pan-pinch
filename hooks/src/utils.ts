@@ -222,3 +222,31 @@ export function checkPositionBounds(
   const y = boundLimiter(positionY, minPositionY, maxPositionY, limitToBounds);
   return { x, y };
 }
+
+
+export function handleCalculateBounds(
+  newScale: number,
+  limitToWrapper: boolean,
+  wrapper: HTMLElement
+) {
+  const {
+    wrapperWidth,
+    wrapperHeight,
+    newWrapperHeight,
+    newDiffWidth,
+    newWrapperWidth,
+    newDiffHeight,
+  } = getComponentsSizes(wrapper, newScale);
+
+  const bounds = calculateBoundingArea(
+    wrapperWidth,
+    newWrapperWidth,
+    newDiffWidth,
+    wrapperHeight,
+    newWrapperHeight,
+    newDiffHeight,
+    limitToWrapper
+  );
+
+  return bounds;
+}

@@ -1,9 +1,9 @@
 import { reactive, Ref, onMounted, onUnmounted, watch, ref } from "vue";
 import type { InitialState } from "./types";
-import { useZoom, handleCalculateBounds } from "./useZoom";
+import { useZoom } from "./useZoom";
 import { usePan } from "./usePan";
 import { usePinch } from "./usePinch";
-import { makePassiveEventOption, getDistance } from "./utils";
+import { makePassiveEventOption, handleCalculateBounds } from "./utils";
 
 const initialState: InitialState = {
   previousScale: 1,
@@ -54,6 +54,10 @@ const initialState: InitialState = {
     animationTime: 200,
     animationType: "easeOut",
   },
+  pinch: {
+    disabled: false,
+    step: 1,
+  },
 };
 
 type Optiosn = {
@@ -81,7 +85,7 @@ export function useGesture({ wrapper, contentRef }: Optiosn) {
     contentRef,
   });
 
-  const { handleZoomPinch } = usePinch({
+  const { handleZoomPinch, handlePinchStart } = usePinch({
     state,
     wrapper,
     contentRef,
@@ -95,60 +99,56 @@ export function useGesture({ wrapper, contentRef }: Optiosn) {
       pan: { disabled, limitToWrapperBounds },
     } = state;
     if (!wrapper.value) return;
-    if (state.options.disabled || disabled || scale < minScale || !wrapper.value.contains(target as HTMLElement) ) return
-    state.bounds = handleCalculateBounds(scale, limitToWrapperBounds, wrapper.value)
+    if (
+      state.options.disabled ||
+      disabled ||
+      scale < minScale ||
+      !wrapper.value.contains(target as HTMLElement)
+    )
+      return;
+    state.bounds = handleCalculateBounds(
+      scale,
+      limitToWrapperBounds,
+      wrapper.value
+    );
 
-    const isMobile = event instanceof TouchEvent
+    const isMobile = event instanceof TouchEvent;
     // Mobile points
     if (isMobile && event.touches.length === 1) {
-
+      const { positionX, positionY } = state;
+      state.isDown = true;
+      startCoords.value = {
+        x: event.touches[0].clientX - positionX,
+        y: event.touches[0].clientY - positionY,
+      };
     }
-      // Desktop points
-      if (!isMobile) {
-        const { positionX, positionY } = state;
-        state.isDown = true;
-        startCoords.value = { x: event.clientX - positionX, y: event.clientY - positionY };
-      }
+    // Desktop points
+    if (!isMobile) {
+      const { positionX, positionY } = state;
+      state.isDown = true;
+      startCoords.value = {
+        x: event.clientX - positionX,
+        y: event.clientY - positionY,
+      };
+    }
   }
 
-  const handlePinch = (event) => {
-    handleZoomPinch(event);
-  };
-
-  const handlePinchStart = (event: TouchEvent) => {
-    const { scale } = state;
-    event.preventDefault();
-    event.stopPropagation();
-
-    const distance = getDistance(event.touches[0], event.touches[1]);
-    state.pinchStartDistance = distance;
-    state.lastDistance = distance;
-    state.pinchStartScale = scale;
-  };
-
-  const handleTouch = (event) => {
-    const { disabled } = state;
+  const handleTouch = (event: TouchEvent) => {
+    const { options: { disabled }, pinch, pan } = state;
     if (disabled) return;
-    if (event.touches.length === 1) return handlePanning(event);
-    if (event.touches.length === 2) return handlePinch(event);
-  };
-
-  const handlePinchStop = () => {
-    if (typeof state.pinchStartScale === "number") {
-      state.pinchStartDistance = null;
-      state.lastDistance = null;
-      state.pinchStartScale = null;
-    }
-  };
-
-  const handleTouchStop = () => {
-    // handlePinchStop();
-    handleStopPanning();
+    if (!pan.disabled && event.touches.length === 1) return handlePanning(event);
+    if (!pinch.disabled && event.touches.length === 2) return handleZoomPinch(event);
   };
 
   const handleTouchStart = (event: TouchEvent) => {
-    const { scale, disabled, minScale } = state;
+    const {
+      scale,
+      options: { disabled, minScale },
+    } = state;
+
     const { touches } = event;
+    console.log('touches: ', touches);
+
     if (disabled || !wrapper.value || !contentRef.value || scale < minScale)
       return;
     if (touches && touches.length === 1) return handleStartPanning(event);
@@ -167,14 +167,17 @@ export function useGesture({ wrapper, contentRef }: Optiosn) {
       const passiveOption = makePassiveEventOption(false);
       // zoom
       wrapper.value.addEventListener("wheel", handleWheel, passiveOption);
-
       wrapper.value.addEventListener(
         "touchstart",
         handleTouchStart,
         passiveOption
       );
-
       wrapper.value.addEventListener("touchmove", handleTouch, passiveOption);
+      wrapper.value.addEventListener(
+        "touchend",
+        handleStopPanning,
+        passiveOption,
+      );
     }
   });
 

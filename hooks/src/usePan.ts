@@ -78,13 +78,11 @@ export function usePan({ state, startCoords , wrapper, contentRef}: Optiosn) {
     return false
   };
 
-
   function handleStopPanning() {
     if (state.isDown) {
       state.isDown = false;
     }
   }
-
 
   return {
     handlePanning,
