@@ -27,18 +27,17 @@ export default defineComponent({
         zoomingEnabled={true}
         limitToBounds={false}
       >
-        {/* <div class="content" >
+        <div class="content" >
           <img src={car} />
-        </div> */}
-        <div class="wrp">
+        </div>
+        {/* <div class="wrp">
           <span>not nested element</span>
           <div class="test-container">
-            {/* <img src={car}  /> */}
             {n.value.map((item) => (
               <div class="test-item">Nested flex item { item }</div>
             ))}
           </div>
-        </div>
+        </div> */}
       </TransformComponent>
     );
   },

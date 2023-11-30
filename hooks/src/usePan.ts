@@ -25,17 +25,17 @@ export function getClientPosition(event: MouseEvent | TouchEvent) {
 
 
 export function usePan({ state, startCoords , wrapper, contentRef}: Optiosn) {
+
   function handlePanning(event: TouchEvent | MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
     if (checkIsPanningActive(event)) return;
     const {
-      limitToBounds,
       positionX,
       positionY,
-      lockAxisX,
-      lockAxisY,
-      bounds,
+      options: { limitToBounds },
+      pan: { lockAxisX, lockAxisY },
+      bounds
     } = state;
     if (!startCoords.value) return;
     const { x, y } = startCoords.value;
@@ -45,8 +45,6 @@ export function usePan({ state, startCoords , wrapper, contentRef}: Optiosn) {
     const newPositionX = lockAxisX ? positionX : clientX - x;
     const newPositionY = lockAxisY ? positionY : clientY - y;
     if (newPositionX === positionX && newPositionY === positionY) return;
-
-    console.log(newPositionX, 'newPositionX');
 
     const calculatedPosition = checkPositionBounds(
       newPositionX,
@@ -62,9 +60,9 @@ export function usePan({ state, startCoords , wrapper, contentRef}: Optiosn) {
   }
 
   const checkIsPanningActive = (event: TouchEvent | MouseEvent) => {
-    const { panningEnabled, disabled, isDown } = state;
+    const { pan: { disabled }, isDown } = state;
 
-    if (!isDown || !panningEnabled || disabled) {
+    if (!isDown || disabled || state.options.disabled) {
       return true
     }
     if (!wrapper.value || !contentRef.value) {

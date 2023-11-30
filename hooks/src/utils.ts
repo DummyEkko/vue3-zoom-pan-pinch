@@ -12,7 +12,11 @@ export const getMidPagePosition = (firstPoint: Touch, secondPoint: Touch) => {
  * Returns middle coordinates x,y of two points
  * Used to get middle point of two fingers pinch
  */
-export const getMiddleCoords = (firstPoint: Touch, secondPoint: Touch, wrapperComponent: HTMLElement) => {
+export const getMiddleCoords = (
+  firstPoint: Touch,
+  secondPoint: Touch,
+  wrapperComponent: HTMLElement
+) => {
   if (isNaN(firstPoint.x)) {
     const dist = getMidPagePosition(firstPoint, secondPoint);
     const rect = wrapperComponent.getBoundingClientRect();
@@ -27,15 +31,13 @@ export const getMiddleCoords = (firstPoint: Touch, secondPoint: Touch, wrapperCo
   };
 };
 
-
 export function checkIsNumber(num: unknown, defaultValue: number) {
-  return typeof num === 'number' ? num : defaultValue
+  return typeof num === "number" ? num : defaultValue;
 }
 
 export function roundNumber(num: number, decimal = 5) {
-  return Number(num.toFixed(decimal))
+  return Number(num.toFixed(decimal));
 }
-
 
 /**
  * Calculate bounding area of zoomed/panned element
@@ -50,9 +52,13 @@ export const calculateBoundingArea = (
   limitToWrapperBounds: boolean
 ) => {
   const scaleWidthFactor =
-    wrapperWidth > contentWidth ? diffWidth * (limitToWrapperBounds ? 1 : 0.5) : 0;
+    wrapperWidth > contentWidth
+      ? diffWidth * (limitToWrapperBounds ? 1 : 0.5)
+      : 0;
   const scaleHeightFactor =
-    wrapperHeight > contentHeight ? diffHeight * (limitToWrapperBounds ? 1 : 0.5) : 0;
+    wrapperHeight > contentHeight
+      ? diffHeight * (limitToWrapperBounds ? 1 : 0.5)
+      : 0;
 
   const minPositionX = wrapperWidth - contentWidth - scaleWidthFactor;
   const maxPositionX = 0 + scaleWidthFactor;
@@ -61,7 +67,6 @@ export const calculateBoundingArea = (
 
   return { minPositionX, maxPositionX, minPositionY, maxPositionY };
 };
-
 
 /**
  * Keeps value between given bounds, used for limiting view to given boundaries
@@ -77,40 +82,51 @@ export const boundLimiter = (value, minBound, maxBound, isActive) => {
   return value;
 };
 
-
 /**
  * Returns distance between two points x,y
  */
 export const getDistance = (firstPoint: Touch, secondPoint: Touch) => {
-  return Math.hypot(firstPoint.pageX - secondPoint.pageX, firstPoint.pageY - secondPoint.pageY);
+  return Math.sqrt(
+    Math.pow(firstPoint.pageX - secondPoint.pageX, 2) +
+      Math.pow(firstPoint.pageY - secondPoint.pageY, 2)
+  );
 };
-
-
 
 let passiveSupported = false;
 
-export function makePassiveEventOption(passive) {
+export function makePassiveEventOption(passive: boolean) {
   return passiveSupported ? { passive } : passive;
 }
 
-
-export function getDelta(event: WheelEvent | MouseEvent | TouchEvent, customDelta?: unknown) {
+export function getDelta(
+  event: WheelEvent | MouseEvent | TouchEvent,
+  customDelta?: unknown
+) {
   const deltaY = event ? (event.deltaY < 0 ? 1 : -1) : 0;
   const delta = checkIsNumber(customDelta, deltaY);
   return delta;
 }
 
-export function checkZoomBounds(zoom: number, minScale: number, maxScale: number, zoomPadding: number, enablePadding: boolean) {
+export function checkZoomBounds(
+  zoom: number,
+  minScale: number,
+  maxScale: number,
+  zoomPadding: number,
+  enablePadding: boolean
+) {
   const scalePadding = enablePadding ? zoomPadding : 0;
   const minScaleWithPadding = minScale - scalePadding;
 
   if (!isNaN(maxScale) && zoom >= maxScale) return maxScale;
-  if (!isNaN(minScale) && zoom <= minScaleWithPadding) return minScaleWithPadding;
+  if (!isNaN(minScale) && zoom <= minScaleWithPadding)
+    return minScaleWithPadding;
   return zoom;
 }
 
-
-export function getComponentsSizes(wrapperComponent: HTMLElement, newScale: number) {
+export function getComponentsSizes(
+  wrapperComponent: HTMLElement,
+  newScale: number
+) {
   const wrapperRect = wrapperComponent.getBoundingClientRect();
 
   const wrapperWidth = wrapperRect.width;
@@ -132,10 +148,13 @@ export function getComponentsSizes(wrapperComponent: HTMLElement, newScale: numb
   };
 }
 
-
-export function wheelMousePosition(event: MouseEvent | WheelEvent, contentComponent: HTMLElement, scale: number): {
-  mouseX: number,
-  mouseY: number
+export function wheelMousePosition(
+  event: MouseEvent | WheelEvent,
+  contentComponent: HTMLElement,
+  scale: number
+): {
+  mouseX: number;
+  mouseY: number;
 } {
   const contentRect = contentComponent.getBoundingClientRect();
 
@@ -143,7 +162,8 @@ export function wheelMousePosition(event: MouseEvent | WheelEvent, contentCompon
   const mouseX = (event.clientX - contentRect.left) / scale;
   const mouseY = (event.clientY - contentRect.top) / scale;
 
-  if (isNaN(mouseX) || isNaN(mouseY)) return console.error("No mouse or touch offset found");
+  if (isNaN(mouseX) || isNaN(mouseY))
+    return console.error("No mouse or touch offset found");
 
   return {
     mouseX,
@@ -151,18 +171,32 @@ export function wheelMousePosition(event: MouseEvent | WheelEvent, contentCompon
   };
 }
 
-
-export function handleCalculatePositions(state, mouseX, mouseY, newScale, bounds, limitToBounds) {
-
-  const { scale, positionX, positionY, transformEnabled } = state;
-  console.log(scale, positionX, positionY, transformEnabled , state);
+export function handleCalculatePositions(
+  state,
+  mouseX,
+  mouseY,
+  newScale,
+  bounds,
+  limitToBounds
+): {
+  x: number
+  y: number
+} {
+  const {
+    scale,
+    positionX,
+    positionY,
+    options: { transformEnabled },
+  } = state;
+  // console.log(scale, positionX, positionY, transformEnabled , state);
 
   const scaleDifference = newScale - scale;
 
   if (typeof mouseX !== "number" || typeof mouseY !== "number")
     return console.error("Mouse X and Y position were not provided!");
 
-  if (!transformEnabled) return { newPositionX: positionX, newPositionY: positionY };
+  if (!transformEnabled)
+    return { newPositionX: positionX, newPositionY: positionY };
 
   const calculatedPositionX = positionX - mouseX * scaleDifference;
   const calculatedPositionY = positionY - mouseY * scaleDifference;
@@ -177,7 +211,12 @@ export function handleCalculatePositions(state, mouseX, mouseY, newScale, bounds
   return newPositions;
 }
 
-export function checkPositionBounds(positionX: number, positionY: number, bounds, limitToBounds) {
+export function checkPositionBounds(
+  positionX: number,
+  positionY: number,
+  bounds,
+  limitToBounds
+) {
   const { minPositionX, minPositionY, maxPositionX, maxPositionY } = bounds;
   const x = boundLimiter(positionX, minPositionX, maxPositionX, limitToBounds);
   const y = boundLimiter(positionY, minPositionY, maxPositionY, limitToBounds);
