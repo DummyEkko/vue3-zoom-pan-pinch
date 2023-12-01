@@ -1,12 +1,11 @@
-import { Ref } from "vue";
+import { Ref, ref } from "vue";
 import type { InitialState } from "./types";
-import { checkPositionBounds } from "./utils";
+import { checkPositionBounds, handleCalculateBounds } from "./utils";
 
 interface Optiosn {
   wrapper: Ref<HTMLElement | null>;
   contentRef: Ref<HTMLElement | null>;
   state: InitialState;
-  startCoords: Ref<null | { x: number; y: number }>;
 }
 
 export function getClientPosition(event: MouseEvent | TouchEvent) {
@@ -24,7 +23,9 @@ export function getClientPosition(event: MouseEvent | TouchEvent) {
 }
 
 
-export function usePan({ state, startCoords , wrapper, contentRef}: Optiosn) {
+export function usePan({ state , wrapper, contentRef}: Optiosn) {
+
+  const startCoords = ref<null | { x: number; y: number }>();
 
   function handlePanning(event: TouchEvent | MouseEvent) {
     event.preventDefault();
@@ -84,8 +85,51 @@ export function usePan({ state, startCoords , wrapper, contentRef}: Optiosn) {
     }
   }
 
+  function handleStartPanning(event: MouseEvent | TouchEvent) {
+    const { target } = event;
+    const {
+      scale,
+      options: { minScale },
+      pan: { disabled, limitToWrapperBounds },
+    } = state;
+    if (!wrapper.value) return;
+    if (
+      state.options.disabled ||
+      disabled ||
+      scale < minScale ||
+      !wrapper.value.contains(target as HTMLElement)
+    )
+      return;
+    state.bounds = handleCalculateBounds(
+      scale,
+      limitToWrapperBounds,
+      wrapper.value
+    );
+
+    const isMobile = event instanceof TouchEvent;
+    // Mobile points
+    if (isMobile && event.touches.length === 1) {
+      const { positionX, positionY } = state;
+      state.isDown = true;
+      startCoords.value = {
+        x: event.touches[0].clientX - positionX,
+        y: event.touches[0].clientY - positionY,
+      };
+    }
+    // Desktop points
+    if (!isMobile) {
+      const { positionX, positionY } = state;
+      state.isDown = true;
+      startCoords.value = {
+        x: event.clientX - positionX,
+        y: event.clientY - positionY,
+      };
+    }
+  }
+
   return {
     handlePanning,
-    handleStopPanning
+    handleStopPanning,
+    handleStartPanning
   };
 }

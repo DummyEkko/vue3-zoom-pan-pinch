@@ -3,15 +3,64 @@
 > Super fast and light vue3 npm package for zooming, panning and pinching html elements in easy way
 
 
-## Development
+## Install
 
 ```bash
+npm install --save vue3-zoom-pan-pinch
+```
 
-pnpm install
+or
 
-pnpm --filter example run dev
+```bash
+yarn add vue3-zoom-pan-pinch
+```
+
+
+## Usage
+
+```jsx
+import {
+  defineComponent,
+  ref,
+  shallowRef,
+  watch,
+  unref,
+  reactive,
+  onMounted,
+} from "vue";
+import { TransformComponent } from "vue3-zoom-pan-pinch";
+import car from "./assets/images/car.png";
+import "./App.scss";
+
+export default defineComponent({
+  name: "App",
+  setup() {
+    const transformComponentRef = ref(null);
+    return () => (
+      <div>
+        <TransformComponent
+          ref={transformComponentRef}
+          defaultScale={1.2}
+          defaultPositionX={10}
+          defaultPositionY={20}
+          wheel={{
+            step: 1,
+          }}
+        >
+          <div class="content">
+            <img src={car} />
+          </div>
+        </TransformComponent>
+        <footer>
+          <button onClick={transformComponentRef.value?.resetTransform}>reset</button>
+        </footer>
+      </div>
+    );
+  },
+});
 
 ```
+
 
 ## Props of TransformComponent
 
@@ -65,4 +114,6 @@ pnpm --filter example run dev
 | :------- | :-----: | ------: |
 | disabled |  false  | boolean |
 | step     |    1    |  number |
+
+
 

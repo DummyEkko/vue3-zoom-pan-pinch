@@ -8,9 +8,11 @@ import dts from 'vite-plugin-dts'
 export default defineConfig(
   {
     build: {
+      cssCodeSplit: true,
       lib: {
         // Could also be a dictionary or array of multiple entry points
         entry: resolve(__dirname, 'src/index.ts'),
+        name: 'vue3-zoom-pan-pinch'
         // fileName: (format) => {
         //   return `${format}/[name].js`;
         // },
@@ -43,6 +45,12 @@ export default defineConfig(
         ],
       },
     },
+    // css: {
+    //   modules: { // css模块化 文件以.module.[css|less|scss]结尾
+    //     generateScopedName: '[name]__[local]___[hash:base64:5]',
+    //     scopeBehaviour: 'local',
+    //  },
+    // },
     plugins: [
       vue(),
       vueJsx(),

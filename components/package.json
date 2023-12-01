@@ -1,7 +1,7 @@
 {
   "name": "vue3-zoom-pan-pinch",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.1",
+  "description": "vue3 zoom and pan",
   "type": "module",
   "main": "dist/cjs/index.js",
   "module": "./dist/es/index.js",
@@ -19,7 +19,15 @@
   "peerDependencies": {
     "vue": ">=3.0.0"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "keywords": ["vue3", "zoom", "pan", "pinch", "touch", "scale"],
+  "bugs": "https://github.com/DummyEkko/vue3-zoom-pan-pinch/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DummyEkko/vue3-zoom-pan-pinch"
+  },
+  "author": "DummyEkko",
+  "license": "ISC",
+  "files": [
+    "dist"
+  ]
 }

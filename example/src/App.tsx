@@ -15,22 +15,22 @@ export default defineComponent({
   name: "App",
   setup() {
     const transformComponentRef = ref(null);
-    const n = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-    onMounted(() => {
-      console.log(transformComponentRef.value);
-    });
+    // const n = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     return () => (
-      <TransformComponent
-        ref={transformComponentRef}
-        panningEnabled={true}
-        initScale={1}
-        zoomingEnabled={true}
-        limitToBounds={false}
-      >
-        <div class="content" >
-          <img src={car} />
-        </div>
-        {/* <div class="wrp">
+      <div>
+        <TransformComponent
+          ref={transformComponentRef}
+          defaultScale={1.2}
+          defaultPositionX={10}
+          defaultPositionY={20}
+          wheel={{
+            step: 1,
+          }}
+        >
+          <div class="content">
+            <img src={car} />
+          </div>
+          {/* <div class="wrp">
           <span>not nested element</span>
           <div class="test-container">
             {n.value.map((item) => (
@@ -38,7 +38,11 @@ export default defineComponent({
             ))}
           </div>
         </div> */}
-      </TransformComponent>
+        </TransformComponent>
+        <footer>
+          <button onClick={transformComponentRef.value?.resetTransform}>reset</button>
+        </footer>
+      </div>
     );
   },
 });

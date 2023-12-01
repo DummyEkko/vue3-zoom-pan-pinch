@@ -3,13 +3,16 @@ import type { InitialState } from "./types";
 import { useZoom } from "./useZoom";
 import { usePan } from "./usePan";
 import { usePinch } from "./usePinch";
-import { makePassiveEventOption, handleCalculateBounds } from "./utils";
+import { makePassiveEventOption } from "./utils";
 
 const initialState: InitialState = {
   previousScale: 1,
   scale: 1,
   positionX: 0,
   positionY: 0,
+  defaultScale: 1,
+  defaultPositionX: 0,
+  defaultPositionY: 0,
   options: {
     disabled: false,
     transformEnabled: true,
@@ -63,23 +66,82 @@ const initialState: InitialState = {
 type Optiosn = {
   wrapper: Ref<HTMLElement | null>;
   contentRef: Ref<HTMLElement | null>;
+  defaultScale: number;
+  defaultPositionX: number;
+  defaultPositionY: number;
+  options: {
+    disabled?: boolean;
+    minPositionX?: null | number;
+    maxPositionX?: null | number;
+    minPositionY?: null | number;
+    maxPositionY?: null | number;
+    minScale?: number;
+    maxScale?: number;
+  };
+  wheel?: {
+    disabled?: boolean;
+    step?: number;
+    wheelEnabled?: boolean;
+    touchPadEnabled?: boolean;
+    disableLimitsOnWheel?: boolean;
+  };
+  pan: {
+    disabled?: boolean;
+    lockAxisX?: boolean;
+    lockAxisY?: boolean;
+  };
+  pinch: {
+    disabled?: boolean;
+    step?: number;
+  };
 };
 
-export function useGesture({ wrapper, contentRef }: Optiosn) {
+export function useGesture({
+  wrapper,
+  contentRef,
+  defaultScale,
+  defaultPositionX,
+  defaultPositionY,
+  options,
+  pan,
+  pinch,
+  wheel,
+}: Optiosn) {
+
+
   const state = reactive({
     ...initialState,
+    defaultPositionX,
+    defaultPositionY,
+    defaultScale,
+    scale: defaultScale,
+    positionX: defaultPositionX ?? initialState.positionX,
+    positionY: defaultPositionY ?? initialState.positionY,
+    options: {
+      ...initialState.options,
+      ...options,
+    },
+    pan: {
+      ...initialState.pan,
+      ...pan,
+    },
+    pinch: {
+      ...initialState.pinch,
+      ...pinch,
+    },
+    wheel: {
+      ...initialState.wheel,
+      ...wheel,
+    },
   });
 
-  const startCoords = ref();
-
-  const { handleWheel } = useZoom<InitialState>({
+  const { handleWheel, resetTransform } = useZoom<InitialState>({
     state,
     wrapper,
     contentRef,
   });
 
-  const { handlePanning, handleStopPanning } = usePan({
-    startCoords,
+  const { handleStartPanning, handlePanning, handleStopPanning } = usePan({
     state,
     wrapper,
     contentRef,
@@ -91,53 +153,17 @@ export function useGesture({ wrapper, contentRef }: Optiosn) {
     contentRef,
   });
 
-  function handleStartPanning(event: MouseEvent | TouchEvent) {
-    const { target } = event;
-    const {
-      scale,
-      options: { minScale },
-      pan: { disabled, limitToWrapperBounds },
-    } = state;
-    if (!wrapper.value) return;
-    if (
-      state.options.disabled ||
-      disabled ||
-      scale < minScale ||
-      !wrapper.value.contains(target as HTMLElement)
-    )
-      return;
-    state.bounds = handleCalculateBounds(
-      scale,
-      limitToWrapperBounds,
-      wrapper.value
-    );
-
-    const isMobile = event instanceof TouchEvent;
-    // Mobile points
-    if (isMobile && event.touches.length === 1) {
-      const { positionX, positionY } = state;
-      state.isDown = true;
-      startCoords.value = {
-        x: event.touches[0].clientX - positionX,
-        y: event.touches[0].clientY - positionY,
-      };
-    }
-    // Desktop points
-    if (!isMobile) {
-      const { positionX, positionY } = state;
-      state.isDown = true;
-      startCoords.value = {
-        x: event.clientX - positionX,
-        y: event.clientY - positionY,
-      };
-    }
-  }
-
   const handleTouch = (event: TouchEvent) => {
-    const { options: { disabled }, pinch, pan } = state;
+    const {
+      options: { disabled },
+      pinch,
+      pan,
+    } = state;
     if (disabled) return;
-    if (!pan.disabled && event.touches.length === 1) return handlePanning(event);
-    if (!pinch.disabled && event.touches.length === 2) return handleZoomPinch(event);
+    if (!pan.disabled && event.touches.length === 1)
+      return handlePanning(event);
+    if (!pinch.disabled && event.touches.length === 2)
+      return handleZoomPinch(event);
   };
 
   const handleTouchStart = (event: TouchEvent) => {
@@ -145,10 +171,7 @@ export function useGesture({ wrapper, contentRef }: Optiosn) {
       scale,
       options: { disabled, minScale },
     } = state;
-
     const { touches } = event;
-    console.log('touches: ', touches);
-
     if (disabled || !wrapper.value || !contentRef.value || scale < minScale)
       return;
     if (touches && touches.length === 1) return handleStartPanning(event);
@@ -176,7 +199,7 @@ export function useGesture({ wrapper, contentRef }: Optiosn) {
       wrapper.value.addEventListener(
         "touchend",
         handleStopPanning,
-        passiveOption,
+        passiveOption
       );
     }
   });
@@ -186,9 +209,15 @@ export function useGesture({ wrapper, contentRef }: Optiosn) {
     window.removeEventListener("mousedown", handleStartPanning);
     window.removeEventListener("mousemove", handlePanning);
     window.removeEventListener("mouseup", handleStopPanning);
+
+    wrapper.value?.removeEventListener("touchstart", handleTouchStart);
+    wrapper.value?.removeEventListener("touchmove", handleTouch);
+    wrapper.value?.removeEventListener("touchend", handleStopPanning);
+
   });
 
   return {
     state,
+    resetTransform
   };
 }

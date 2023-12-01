@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "vue-tsc -p tsconfig.components.json --composite false --declaration --emitDeclarationOnly",
-    "build:com": "pnpm --filter vue3-zoom-pan-pinch run build "
+    "build:com": "pnpm --filter vue3-zoom-pan-pinch run build"
   },
   "keywords": [],
   "author": "",

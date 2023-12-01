@@ -1,7 +1,4 @@
-
-import {
-  Ref, shallowRef,
-} from "vue";
+import { Ref, shallowRef } from "vue";
 import {
   roundNumber,
   calculateBoundingArea,
@@ -10,22 +7,24 @@ import {
   getComponentsSizes,
   wheelMousePosition,
   handleCalculatePositions,
-  handleCalculateBounds
+  handleCalculateBounds,
 } from "./utils";
 import type { InitialState } from "./types";
-import { log } from "console";
 
 interface Optiosn<T> {
   wrapper: Ref<HTMLElement | null>;
   contentRef: Ref<HTMLElement | null>;
-  state: InitialState
-};
+  state: InitialState;
+}
 
-let wheelStopEventTimer: NodeJS.Timeout | null
+let wheelStopEventTimer: NodeJS.Timeout | null;
 
-
-
-function handleCalculateZoom(state: InitialState, delta: number, step: number, disablePadding: boolean) {
+function handleCalculateZoom(
+  state: InitialState,
+  delta: number,
+  step: number,
+  disablePadding: boolean
+) {
   const {
     scale,
     options: { maxScale, minScale },
@@ -38,18 +37,15 @@ function handleCalculateZoom(state: InitialState, delta: number, step: number, d
     minScale,
     maxScale,
     size,
-    paddingEnabled,
+    paddingEnabled
   );
   return newScale;
 }
 
 export function useZoom<T>({ state, wrapper, contentRef }: Optiosn<T>) {
+  const previousWheelEvent = shallowRef();
 
-  const previousWheelEvent = shallowRef()
-
-  function handleWheelZoom(
-    event: WheelEvent,
-  ) {
+  function handleWheelZoom(event: WheelEvent) {
     event.preventDefault();
     event.stopPropagation();
 
@@ -76,7 +72,8 @@ export function useZoom<T>({ state, wrapper, contentRef }: Optiosn<T>) {
       scale
     );
 
-    const isLimitedToBounds = limitToBounds && (disabled || size === 0 || disableLimitsOnWheel);
+    const isLimitedToBounds =
+      limitToBounds && (disabled || size === 0 || disableLimitsOnWheel);
 
     const { x, y } = handleCalculatePositions(
       state,
@@ -107,8 +104,8 @@ export function useZoom<T>({ state, wrapper, contentRef }: Optiosn<T>) {
       options.disabled ||
       !wrapper.value ||
       !contentRef.value
-    ) return
-
+    )
+      return;
 
     // ctrlKey detects if touchpad execute wheel or pinch gesture
     if (!wheelEnabled && !event.ctrlKey) return;
@@ -133,24 +130,55 @@ export function useZoom<T>({ state, wrapper, contentRef }: Optiosn<T>) {
     }
   };
 
-  const handleWheelStop = (previousEvent: WheelEvent, event: WheelEvent, state: InitialState) => {
+  const handleWheelStop = (
+    previousEvent: WheelEvent,
+    event: WheelEvent,
+    state: InitialState
+  ) => {
     const {
       scale,
       options: { maxScale, minScale },
     } = state;
     if (!previousEvent) return false;
     if (scale < maxScale || scale > minScale) return true;
-    if (Math.sign(previousEvent.deltaY) !== Math.sign(event.deltaY)) return true;
+    if (Math.sign(previousEvent.deltaY) !== Math.sign(event.deltaY))
+      return true;
     if (previousEvent.deltaY > 0 && previousEvent.deltaY < event.deltaY)
       return true;
     if (previousEvent.deltaY < 0 && previousEvent.deltaY > event.deltaY)
       return true;
-    if (Math.sign(previousEvent.deltaY) !== Math.sign(event.deltaY)) return true;
+    if (Math.sign(previousEvent.deltaY) !== Math.sign(event.deltaY))
+      return true;
     return false;
   };
 
+  const resetTransform = () => {
+    const {
+      defaultScale,
+      defaultPositionX,
+      defaultPositionY,
+      scale,
+      positionX,
+      positionY,
+      options: {
+        disabled
+      }
+    } = state;
+    if (disabled) return
+    if (
+      scale === defaultScale &&
+      positionX === defaultPositionX &&
+      positionY === defaultPositionY
+    )
+      return;
+
+    state.positionX = defaultPositionX;
+    state.positionY = defaultPositionY;
+    state.scale = defaultScale;
+  };
+
   return {
-    state,
-    handleWheel
+    handleWheel,
+    resetTransform,
   };
 }
