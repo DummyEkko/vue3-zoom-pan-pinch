@@ -7,7 +7,7 @@
     // 路径别名设置
     "paths": {
       "@vue3-zoom-pan-pinch/hooks": ["../hooks/src"],
-      // "vue3-zoom-pan-pinch": ["../components/src"]
+      "vue3-zoom-pan-pinch": ["../components/src"]
     },
     "jsx": "preserve"
   },

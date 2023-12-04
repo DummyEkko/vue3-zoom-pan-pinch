@@ -10,6 +10,7 @@ import {
   handleCalculateBounds,
 } from "./utils";
 import type { InitialState } from "./types";
+import { log } from "console";
 
 interface Optiosn<T> {
   wrapper: Ref<HTMLElement | null>;
@@ -165,6 +166,8 @@ export function useZoom<T>({ state, wrapper, contentRef }: Optiosn<T>) {
       }
     } = state;
     if (disabled) return
+    console.log(disabled, 'disabled');
+
     if (
       scale === defaultScale &&
       positionX === defaultPositionX &&

@@ -1,4 +1,4 @@
-import { reactive, Ref, onMounted, onUnmounted, watch, ref } from "vue";
+import { reactive, Ref, onMounted, onUnmounted, watch } from "vue";
 import type { InitialState } from "./types";
 import { useZoom } from "./useZoom";
 import { usePan } from "./usePan";
@@ -63,7 +63,7 @@ const initialState: InitialState = {
   },
 };
 
-type Optiosn = {
+export interface Options {
   wrapper: Ref<HTMLElement | null>;
   contentRef: Ref<HTMLElement | null>;
   defaultScale: number;
@@ -106,8 +106,7 @@ export function useGesture({
   pan,
   pinch,
   wheel,
-}: Optiosn) {
-
+}: Options) {
 
   const state = reactive({
     ...initialState,
@@ -134,6 +133,14 @@ export function useGesture({
       ...wheel,
     },
   });
+
+
+  watch(options, (n, o) => {
+    state.options = {
+      ...state.options,
+      ...n
+    }
+  })
 
   const { handleWheel, resetTransform } = useZoom<InitialState>({
     state,

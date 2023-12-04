@@ -1,7 +1,9 @@
 
 import { useZoom } from './useZoom'
-import { useGesture  } from './useGesture'
-
+import { useGesture, Options  } from './useGesture'
+export type {
+  Options
+}
 export {
   useZoom,
   useGesture,

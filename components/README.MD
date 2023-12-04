@@ -61,6 +61,27 @@ export default defineComponent({
 
 ```
 
+```vue
+<script setup lang="ts">
+import { TransformComponent } from 'vue3-zoom-pan-pinch'
+import car from './assets/car.png'
+</script>
+
+<template>
+  <div>
+    <TransformComponent
+      :wheel="{
+        step: 1
+      }"
+    >
+      <div class="content">
+        <img :src="car" alt="" srcset="" />
+      </div>
+    </TransformComponent>
+  </div>
+</template>
+```
+
 
 ## Props of TransformComponent
 

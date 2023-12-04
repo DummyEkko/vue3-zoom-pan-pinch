@@ -11,10 +11,10 @@ export default defineConfig({
   },
   resolve: {
     alias: [
-      // {
-      //   find: 'vue3-zoom-pan-pinch',
-      //   replacement: join(__dirname, '..', 'components', 'src'),
-      // },
+      {
+        find: 'vue3-zoom-pan-pinch',
+        replacement: join(__dirname, '..', 'components', 'src'),
+      },
       {
         find: /^@vue3-zoom-pan-pinch\/(.+)$/,
         replacement: join(__dirname, '..', '$1', 'src'),

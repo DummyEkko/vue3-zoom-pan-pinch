@@ -15,6 +15,9 @@ export default defineComponent({
   name: "App",
   setup() {
     const transformComponentRef = ref(null);
+    const options = reactive({
+      disabled: false
+    })
     // const n = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     return () => (
       <div>
@@ -23,6 +26,7 @@ export default defineComponent({
           defaultScale={1.2}
           defaultPositionX={10}
           defaultPositionY={20}
+          options={options}
           wheel={{
             step: 1,
           }}
@@ -40,6 +44,7 @@ export default defineComponent({
         </div> */}
         </TransformComponent>
         <footer>
+          <button onClick={() => options.disabled = true}>disabled</button>
           <button onClick={transformComponentRef.value?.resetTransform}>reset</button>
         </footer>
       </div>

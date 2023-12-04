@@ -2,9 +2,12 @@ import {
   defineComponent,
   ref,
   computed,
+  PropType,
 } from "vue";
 import styles from "./component.module.css";
 import { useGesture } from "@vue3-zoom-pan-pinch/hooks";
+import type { Options } from '@vue3-zoom-pan-pinch/hooks'
+
 
 export default defineComponent({
   name: "TransformComponent",
@@ -19,25 +22,10 @@ export default defineComponent({
       default: 0,
     },
     options: {
-      default: () => ({
-        disabled: false,
-        minPositionX: null,
-        maxPositionX: null,
-        minPositionY: null,
-        maxPositionY: null,
-        minScale: 1,
-        maxScale: 8,
-      }),
+      type: Object as PropType<Options['options']>
     },
     wheel: {
-      // default: () => ({
-        // disabled: false,
-        // step: 6.5,
-        // wheelEnabled: true,
-        // touchPadEnabled: true,
-        // disableLimitsOnWheel: true,
-      // }),
-      type: Object
+      type: Object as PropType<Options['wheel']>
     },
     pan: {
       default: () => ({
@@ -45,15 +33,18 @@ export default defineComponent({
         lockAxisX: false,
         lockAxisY: false,
       }),
+      type: Object as PropType<Options['pan']>
     },
     pinch: {
       default: () => ({
         disabled: false,
         step: 1,
       }),
+      type: Object as PropType<Options['pinch']>
     },
   },
   setup(props, { slots, expose }) {
+
     const wrapper = ref<HTMLElement | null>(null);
     const contentRef = ref<HTMLElement | null>(null);
     const {
@@ -63,9 +54,8 @@ export default defineComponent({
       wheel,
       pan,
       pinch,
-      options
+      options = {}
     } = props;
-
     const { state, resetTransform } = useGesture({
       wrapper,
       contentRef,
